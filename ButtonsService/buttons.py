@@ -11,8 +11,11 @@ import xbmc
 # Decorator for some sugar
 callbacks = []
 
-def listen(func, pin):
-    callbacks.append({ "func": func, "pin": pin })
+def listen(pin):
+    def decorator(func):
+        callbacks.append({ "func": func, "pin": pin })
+    
+    return decorator
 
 # Pin listeners
 @listen(12)
@@ -28,7 +31,7 @@ if __name__ == "__main__":
     GPIO.setwarnings(False)
 
     for c in callbacks:
-        GPIO.setup(c["pin"])
+        GPIO.setup(c["pin"], GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.add_event_detect(c["pin"], GPIO.FALLING, callback=c["func"], bouncetime=300)
 
     while not xbmc.abortRequested:
